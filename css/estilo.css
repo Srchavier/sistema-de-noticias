@@ -5,3 +5,8 @@
 .gritter {
     background: black;
 }
+
+.margin {
+    margin-top: 10px;
+    margin: 10px;
+}
