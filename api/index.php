@@ -32,6 +32,15 @@ $app->post(
     }
 );
 
+$app->get(
+    '/logout',
+    function () use ($app) {
+        session_destroy();
+        header("Location: ../painel/index.php");
+        exit;
+    }
+);
+
 $app->post('/cadastrarNovaNoticia', 'auth', function () use ($app, $db) {
         
         $data = json_decode($app->request()->getBody());
@@ -65,45 +74,45 @@ $app->post('/cadastrarNovaNoticia', 'auth', function () use ($app, $db) {
 
 $app->post('/alterarNoticia/:idnoticia', 'auth', function ($idnoticia) use ($app, $db) {
         
-    $data = json_decode($app->request()->getBody());
-
-    $idnoticia = (int)$idnoticia;
-
-    $noticiatitulo = (isset($data->noticiatitulo)) ? $data->noticiatitulo : "";
-    $noticiadescricao = (isset($data->noticiadescricao)) ? $data->noticiadescricao : "";
-    $noticiadata = (isset($data->noticiadata)) ? $data->noticiadata : "";
-    $noticiatexto = (isset($data->noticiatexto)) ? $data->noticiatexto : "";
+        $data = json_decode($app->request()->getBody());
     
-    $data_tmp = explode('/',$noticiadata);
-
-    if(checkdate($data_tmp[1], $data_tmp[0], $data_tmp[2])){
-        $data = sprintf('%s-%s-%s', $data_tmp[2], $data_tmp[1], $data_tmp[0]);
-    } else {
-        $data = NULL; 
+        $idnoticia = (int)$idnoticia;
+    
+        $noticiatitulo = (isset($data->noticiatitulo)) ? $data->noticiatitulo : "";
+	    $noticiadescricao = (isset($data->noticiadescricao)) ? $data->noticiadescricao : "";
+        $noticiadata = (isset($data->noticiadata)) ? $data->noticiadata : "";
+        $noticiatexto = (isset($data->noticiatexto)) ? $data->noticiatexto : "";
+        
+        $data_tmp = explode('/',$noticiadata);
+    
+        if(checkdate($data_tmp[1], $data_tmp[0], $data_tmp[2])){
+            $data = sprintf('%s-%s-%s', $data_tmp[2], $data_tmp[1], $data_tmp[0]);
+        } else {
+            $data = NULL; 
+        }
+        
+        $consulta = $db->con()->prepare('UPDATE noticia 
+                                        SET 
+                                            noticiatitulo = :NOTICIATITULO, 
+                                            noticiadescricao = :NOTICIADESCRICAO, 
+                                            noticiatexto = :NOTICIATEXTO, 
+                                            noticiadata = :NOTICIADATA
+                                        WHERE 
+                                            idnoticia = :IDNOTICIA');
+    
+        $consulta->bindParam(':NOTICIATITULO', $noticiatitulo);
+        $consulta->bindParam(':NOTICIADESCRICAO', $noticiadescricao);
+        $consulta->bindParam(':NOTICIATEXTO', $noticiatexto);
+        $consulta->bindParam(':NOTICIADATA', $data);
+        $consulta->bindParam(':IDNOTICIA', $idnoticia);
+    
+        if($consulta->execute()){
+            echo json_encode(array("erro"=>false));
+        } else {
+            echo json_encode(array("erro"=>true));
+        }
+        
     }
-    
-    $consulta = $db->con()->prepare('UPDATE noticia 
-                                    SET 
-                                        noticiatitulo = :NOTICIATITULO, 
-                                        noticiadescricao = :NOTICIADESCRICAO, 
-                                        noticiatexto = :NOTICIATEXTO, 
-                                        noticiadata = :NOTICIADATA
-                                    WHERE 
-                                        idnoticia = :IDNOTICIA');
-
-    $consulta->bindParam(':NOTICIATITULO', $noticiatitulo);
-    $consulta->bindParam(':NOTICIADESCRICAO', $noticiadescricao);
-    $consulta->bindParam(':NOTICIATEXTO', $noticiatexto);
-    $consulta->bindParam(':NOTICIADATA', $data);
-    $consulta->bindParam(':IDNOTICIA', $idnoticia);
-
-    if($consulta->execute()){
-        echo json_encode(array("erro"=>false));
-    } else {
-        echo json_encode(array("erro"=>true));
-    }
-    
-}
 );
 
 $app->get('/listarNoticias', 'auth', function () use ($app, $db) {
@@ -113,6 +122,7 @@ $app->get('/listarNoticias', 'auth', function () use ($app, $db) {
                                             noticiatitulo,
                                             noticiadescricao,
                                             noticiatexto,
+                                            noticiastatus,
                                             DATE_FORMAT(noticiadata,'%d/%m/%Y') AS datanoticia
                                         FROM
                                             noticia
@@ -128,60 +138,171 @@ $app->get('/listarNoticias', 'auth', function () use ($app, $db) {
 );
 
 $app->get('/getnoticia/:idnoticia', 'auth', function ($idnoticia) use ($app, $db) {
-    $idnoticia = (int)$idnoticia;
-
-    $consulta = $db->con()->prepare("SELECT
-                                        idnoticia,
-                                        noticiatitulo,
-                                        noticiadescricao,
-                                        noticiatexto,
-                                        DATE_FORMAT(noticiadata,'%d/%m/%Y') AS noticiadata
-                                    FROM
-                                        noticia
-                                    WHERE
-                                        idnoticia = :IDNOTICIA                                            
-                                    ORDER BY
-                                        noticiadata DESC,
-                                        noticiatitulo ASC
-                                    ");
-    $consulta->bindParam(':IDNOTICIA', $idnoticia);
-    $consulta->execute();
-    $noticias = $consulta->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode(array("noticia"=>$noticias[0]));
+        $idnoticia = (int)$idnoticia;
     
-}
+        $consulta = $db->con()->prepare("SELECT
+                                            idnoticia,
+                                            noticiatitulo,
+                                            noticiadescricao,
+                                            noticiatexto,
+                                            DATE_FORMAT(noticiadata,'%d/%m/%Y') AS noticiadata
+                                        FROM
+                                            noticia
+                                        WHERE
+                                            idnoticia = :IDNOTICIA                                            
+                                        ORDER BY
+                                            noticiadata DESC,
+                                            noticiatitulo ASC
+                                        ");
+        $consulta->bindParam(':IDNOTICIA', $idnoticia);
+        $consulta->execute();
+        $noticias = $consulta->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(array("noticia"=>$noticias[0]));
+        
+    }
 );
 
-// gerenciamento de imagens
-
-$app->post('/cadastrarImagem/:idnoticia', 'auth', function ($idnoticia) use ($app, $db) {
-        
-    if ( !empty( $_FILES ) ) {
-        $imagemtitulo = "";
-        $imagemarquivo = $idnoticia."_".uniqid()."_".$_FILES[ 'file' ][ 'name' ];
+$app->get('/trocastatus/:idnoticia/:novostatus', 'auth', function ($idnoticia, $novostatus) use ($app, $db) {       
+    
         $idnoticia = (int)$idnoticia;
+        $novostatus = (int)$novostatus;
         
-        $tempPath = $_FILES[ 'file' ][ 'tmp_name' ];
-        $uploadPath = '../upload/'.$imagemarquivo;            
-        move_uploaded_file( $tempPath, $uploadPath );
-        
-        $consulta = $db->con()->prepare('INSERT INTO imagem(imagemtitulo, imagemarquivo, noticia_idnoticia) VALUES (:IMAGEMTITULO, :IMAGEMARQUIVO, :IDNOTICIA)');
-        $consulta->bindParam(':IMAGEMTITULO', $imagemtitulo);
-        $consulta->bindParam(':IMAGEMARQUIVO', $imagemarquivo);
+        $consulta = $db->con()->prepare('UPDATE noticia 
+                                        SET 
+                                            noticiastatus = :NOTICIASTATUS
+                                        WHERE 
+                                            idnoticia = :IDNOTICIA');
+    
+        $consulta->bindParam(':NOTICIASTATUS', $novostatus);
         $consulta->bindParam(':IDNOTICIA', $idnoticia);
-
+    
         if($consulta->execute()){
             echo json_encode(array("erro"=>false));
         } else {
             echo json_encode(array("erro"=>true));
         }
         
-        
-    } else {
-        echo json_encode(array("erro"=>true));
     }
+);
+
+$app->get('/excluirNoticia/:idnoticia', 'auth', function ($idnoticia) use ($app, $db) {       
     
-}
+        $idnoticia = (int)$idnoticia;
+        
+        // excluir as imagens
+        $consulta = $db->con()->prepare("SELECT
+                                            imagemarquivo
+                                        FROM
+                                            imagem
+                                        WHERE
+                                            noticia_idnoticia = :IDNOTICIA                                        
+                                        ");
+        $consulta->bindParam(':IDNOTICIA', $idnoticia);
+        $consulta->execute();
+    
+        $imagens = $consulta->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach($imagens as $img){
+            @unlink('../upload/'.$img['imagemarquivo']);   
+        }
+    
+        // excluir a notícia
+        $consulta = $db->con()->prepare("DELETE FROM imagem WHERE noticia_idnoticia = :IDNOTICIA");
+        $consulta->bindParam(':IDNOTICIA', $idnoticia);
+        $consulta->execute();
+    
+        $consulta = $db->con()->prepare("DELETE FROM noticia WHERE idnoticia = :IDNOTICIA");
+        $consulta->bindParam(':IDNOTICIA', $idnoticia);        
+    
+        if($consulta->execute()){
+            echo json_encode(array("erro"=>false));
+        } else {
+            echo json_encode(array("erro"=>true));
+        }
+        
+    }
+);
+
+
+// gerenciamento de imagens
+
+$app->post('/cadastrarImagem/:idnoticia', 'auth', function ($idnoticia) use ($app, $db) {
+        
+        if ( !empty( $_FILES ) ) {
+            $imagemtitulo = $_POST['imagemtitulo'];
+            $imagemarquivo = $idnoticia."_".uniqid()."_".$_FILES[ 'file' ][ 'name' ];
+            $idnoticia = (int)$idnoticia;
+            
+            $tempPath = $_FILES[ 'file' ][ 'tmp_name' ];
+            $uploadPath = '../upload/'.$imagemarquivo;            
+            move_uploaded_file( $tempPath, $uploadPath );
+            
+            $consulta = $db->con()->prepare('INSERT INTO imagem(imagemtitulo, imagemarquivo, noticia_idnoticia) VALUES (:IMAGEMTITULO, :IMAGEMARQUIVO, :IDNOTICIA)');
+            $consulta->bindParam(':IMAGEMTITULO', $imagemtitulo);
+            $consulta->bindParam(':IMAGEMARQUIVO', $imagemarquivo);
+            $consulta->bindParam(':IDNOTICIA', $idnoticia);
+
+            if($consulta->execute()){
+                echo json_encode(array("erro"=>false));
+            } else {
+                echo json_encode(array("erro"=>true));
+            }
+            
+            
+        } else {
+            echo json_encode(array("erro"=>true));
+        }
+        
+    }
+);
+
+$app->get('/listarImagens/:idnoticia', 'auth', function ($idnoticia) use ($app, $db) {
+        
+        $idnoticia = (int)$idnoticia;
+    
+        $consulta = $db->con()->prepare("SELECT
+                                            idimagem,
+                                            imagemtitulo,
+                                            imagemarquivo
+                                        FROM
+                                            imagem
+                                        WHERE
+                                            noticia_idnoticia = :IDNOTICIA                                        
+                                        ");
+        $consulta->bindParam(':IDNOTICIA', $idnoticia);
+        $consulta->execute();
+    
+        $imagens = $consulta->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(array("imagens"=>$imagens));
+        
+    }
+);
+
+$app->get('/excluirImagem/:idimagem', 'auth', function ($idimagem) use ($app, $db) {
+        
+        $idimagem = (int)$idimagem;
+    
+        $consulta = $db->con()->prepare("SELECT
+                                            imagemarquivo
+                                        FROM
+                                            imagem
+                                        WHERE
+                                            idimagem = :IDIMAGEM                                        
+                                        ");
+        $consulta->bindParam(':IDIMAGEM', $idimagem);
+        $consulta->execute();
+    
+        $imagem = $consulta->fetchAll(PDO::FETCH_ASSOC)[0];
+    
+        @unlink("../upload/".$imagem['imagemarquivo']);
+    
+        $consulta = $db->con()->prepare("DELETE FROM imagem WHERE idimagem = :IDIMAGEM");
+        $consulta->bindParam(':IDIMAGEM', $idimagem);
+        $consulta->execute();
+    
+        echo json_encode(array("erro"=>false));
+        
+    }
 );
 
 function auth(){
