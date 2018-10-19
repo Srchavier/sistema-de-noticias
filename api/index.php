@@ -63,6 +63,27 @@ $app->post('/cadastrarNovaNoticia', 'auth', function () use ($app, $db) {
     }
 );
 
+$app->get('/listarNoticias', 'auth', function () use ($app, $db) {
+            
+        $consulta = $db->con()->prepare("SELECT
+                                            idnoticia,
+                                            noticiatitulo,
+                                            noticiadescricao,
+                                            noticiatexto,
+                                            DATE_FORMAT(noticiadata,'%d/%m/%Y') AS datanoticia
+                                        FROM
+                                            noticia
+                                        ORDER BY
+                                            noticiadata DESC,
+                                            noticiatitulo ASC
+                                        ");
+        $consulta->execute();
+        $noticias = $consulta->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(array("noticias"=>$noticias));
+        
+    }
+);
+
 function auth(){
     if(isset($_SESSION['logado'])){
         return true;
