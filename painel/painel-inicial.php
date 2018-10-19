@@ -42,6 +42,11 @@
                         <button type="button" class="btn btn-primary" ng-click="abreCadastroNoticia()">
                             Cadastrar Notícia
                         </button>
+
+                        <a 
+                        href="../api/logout" 
+                        class="btn btn-danger pull-right"
+                        onclick="return confirm('Tem certeza')">Logout</a>
                     </div>
                 </div>
             </div>
