@@ -124,6 +124,7 @@
                                     <button type="button" class="btn btn-default">Bloquear</button>
                                 </td>
                                 <td>
+                                    <a href="gerenciarImagens.php?idnoticia={{noticia.idnoticia}}" class="btn btn-success">Imagem</a>
                                     <button type="button" class="btn btn-default" ng-click="getNoticia(noticia.idnoticia)">Alterar</button>
                                     <button type="button" class="btn btn-danger">Excluir</button>
                                 </td>
