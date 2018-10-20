@@ -34,10 +34,16 @@
         <div class="modal fade " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="verfoto">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="container fluid">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <img ng-src="upload/{{fotoMaior}}" class="img-responsive">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Modal title</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container fluid">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <img ng-src="upload/{{fotoMaior}}" class="img-responsive">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -48,7 +54,7 @@
     </div>
     <script src="https://code.jquery.com/jquery-1.11.3.min.js">
     </script>
-    
+
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js">
     </script>>
     <script src="js/angular/angular.min.js"></script>
