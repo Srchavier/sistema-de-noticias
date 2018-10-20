@@ -43,10 +43,7 @@
                             Cadastrar Notícia
                         </button>
 
-                        <a 
-                        href="../api/logout" 
-                        class="btn btn-danger pull-right"
-                        onclick="return confirm('Tem certeza')">Logout</a>
+                        <a href="../api/logout" class="btn btn-danger pull-right" onclick="return confirm('Tem certeza')">Logout</a>
                     </div>
                 </div>
             </div>
@@ -117,7 +114,7 @@
                             <tr>
                                 <th width="120">Data</th>
                                 <th width="120">Título</th>
-                                <th width="60">Bloquear</th>
+                                <th width="60">Status</th>
                                 <th width="120">-</th>
                             </tr>
                         </thead>
@@ -126,16 +123,32 @@
                                 <td>{{noticia.datanoticia}}</td>
                                 <td>{{noticia.noticiatitulo}}</td>
                                 <td>
-                                    <button type="button" class="btn btn-default">Bloquear</button>
+                                    <button type="button" class="btn btn-default" title="nesste momento a noticia está bloqueada"
+                                        ng-show="noticia.noticiastatus==1" ng-click="trocaStatus(noticia, 2)">
+                                        <i class="glyphicon glyphicon-eye-open"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-default" title="nesste momento a noticia está visivel"
+                                        ng-show="noticia.noticiastatus!=1" ng-click="trocaStatus(noticia, 1)">
+                                        <i class="glyphicon glyphicon-eye-close"></i>
+                                    </button>
                                 </td>
                                 <td>
-                                    <a href="gerenciarImagens.php?idnoticia={{noticia.idnoticia}}" class="btn btn-success">Imagem</a>
-                                    <button type="button" class="btn btn-default" ng-click="getNoticia(noticia.idnoticia)">Alterar</button>
-                                    <button type="button" class="btn btn-danger">Excluir</button>
+                                    <a href="gerenciarImagens.php?idnoticia={{noticia.idnoticia}}" class="btn btn-default">
+                                        <i class="glyphicon glyphicon-picture"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-default" ng-click="getNoticia(noticia.idnoticia)">
+                                        <i class="glyphicon glyphicon-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger" ng-click="excluirNoticia(noticia.idnoticia)">
+                                        <i class="glyphicon glyphicon-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    <div class="alert alert-warning" ng-show="allNoticias.length==0">
+                        <strong>Nenhuma noticia cadastrada</strong>
+                    </div>
                 </div>
             </div>
         </div>

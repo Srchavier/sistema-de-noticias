@@ -33,7 +33,46 @@ app.controller('painelInicialControle', function ($scope, $http) {
             .error(function () {
                 $.gritter.add({
                     title: "Error",
-                    text: "Ocorreu ao fazer getNoticia!",
+                    text: "Ocorreu ao fazer buscar por id!",
+                    class_name: "gritter"
+                });
+            });
+    }
+
+    $scope.trocaStatus = function (noticia, novostatus) {
+        $http.get('../api/trocastatus/' + noticia.idnoticia + '/' + novostatus)
+            .success(function (data) {
+                noticia.noticiastatus = novostatus;
+                $.gritter.add({
+                    title: "Sucesso",
+                    text: "Status alterando!",
+                    class_name: "gritter"
+                });
+            })
+            .error(function () {
+                $.gritter.add({
+                    title: "Error",
+                    text: "Ocorreu ao fazer troca status!",
+                    class_name: "gritter"
+                });
+            });
+    }
+
+    $scope.excluirNoticia = function (idnoticia) {
+        if (!confirm('Deseja excluir?')) return false;
+        $http.get('../api/excluirNoticia/' + idnoticia)
+            .success(function (data) {
+                $scope.listarNoticias();
+                $.gritter.add({
+                    title: "Sucesso",
+                    text: "Noticia excluida!",
+                    class_name: "gritter"
+                });
+            })
+            .error(function () {
+                $.gritter.add({
+                    title: "Error",
+                    text: "Ocorreu ao fazer exclusão!",
                     class_name: "gritter"
                 });
             });
@@ -87,7 +126,7 @@ app.controller('painelInicialControle', function ($scope, $http) {
             .error(function () {
                 $.gritter.add({
                     title: "Error",
-                    text: "Ocorreu um error!",
+                    text: "Ocorreu um error ao alterar!",
                     class_name: "gritter"
                 });
             });
