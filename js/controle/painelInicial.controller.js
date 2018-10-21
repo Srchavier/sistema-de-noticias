@@ -5,9 +5,10 @@ app.controller('painelInicialControle', function ($scope, $http, socket) {
     /*chat */
     $scope.senha = '123456';
 
+    // indica que o chat está online ou offline
     $scope.chat = false;
 
-    $scope.chatUsuarios = []
+    $scope.chatUsuarios = [];
 
     $scope.novaMensagem = '';
 
@@ -24,10 +25,27 @@ app.controller('painelInicialControle', function ($scope, $http, socket) {
     });
 
     socket.on('usuarioentrou', function (email) {
-        $scope.chatUsuarios.push({ usuario: email, mensagens: [] })
+        $scope.chatUsuarios.push({ usuario: email, mensagens: [] });
+
         if ($scope.chatUsuarios.length == 1) {
             $scope.usuarioAtivo = 0;
         }
+    });
+
+    socket.on('usuariosaiu', function (usuario) {
+        var ind = $scope.buscaUsuario(usuario);
+
+        console.log('Usuário saiu');
+        console.log($scope.chatUsuarios[ind]);
+
+        $.gritter.add({
+            title: "Usuário saiu",
+            text: $scope.chatUsuarios[ind].usuario + " saiu",
+            class_name: "gritter"
+        });
+
+        $scope.chatUsuarios.splice(ind, 1);
+        $scope.usuarioAtivo = 0;
     });
 
     socket.on('novamensagemparaadmin', function (mensagem) {
@@ -46,24 +64,14 @@ app.controller('painelInicialControle', function ($scope, $http, socket) {
             }
             cont++;
         }
+
         return false;
-    };
-
-    $scope.setaUsuarioAtivo = function (ind) {
-        $scope.usuarioAtivo = ind;
     }
-
-    $scope.scrollDown = function () {
-        setTimeout(function () {
-            $('#mostra_mensagens').scrollTop(1E10);
-        }, 800);
-
-    };
 
     $scope.enviarMensagem = function () {
 
         $scope.chatUsuarios[$scope.usuarioAtivo].mensagens.push(
-            { de: 'Admin', msn: $scope.novaMensagem }
+            { de: 'Admin', msg: $scope.novaMensagem }
         );
 
         socket.emit('enviarmensagemparausuario',
@@ -75,6 +83,17 @@ app.controller('painelInicialControle', function ($scope, $http, socket) {
         $scope.novaMensagem = '';
         $scope.scrollDown();
     }
+
+    $scope.setaUsuarioAtivo = function (ind) {
+        $scope.usuarioAtivo = ind;
+    }
+
+    $scope.scrollDown = function () {
+        setTimeout(function () {
+            $("#mostra_mensagens").scrollTop(1E10);
+        }, 800);
+    }
+
     /* fim chat*/
 
 

@@ -36,35 +36,70 @@
     <div ng-controller="painelInicialControle">
 
 
-        <div class="container" ng-show="chatUsuarios.length>0">
-            <div class="row">
-                <div class="col-xs-12">
-                    <h2>Atendimentos</h2>
+        <div class="container" ng-show="chatUsuarios.length>0">                 
+                <div class="row">
                     <div class="col-xs-12">
-                        <div class="alert alert-info" style="height: 300px; overflow: scroll; overflow-x:hidden;" id="mostra_mensagens">
-                            <div class="well well-sm" ng-repeat="msg in chatUsuarios[usuarioAtivosu].mensagens">
-                                <p>De: {{msg.de}}</p>
-                                <p>{{msg.msg}}</p>
+                        <h2>Atendimentos</h2>
+                        
+                        <div class="col-xs-12">
+                            <div 
+                                 class="alert alert-info"
+                                 style="height:350px; overflow:scroll; overflow-x:hidden;" 
+                                 id="mostra_mensagens"
+                            >
+                            
+                                <div 
+                                     class="well well-sm"
+                                     ng-repeat="msg in chatUsuarios[usuarioAtivo].mensagens"
+                                     >
+                                
+                                    <p>De: {{msg.de}}</p>
+                                    <p>{{msg.msg}}</p>
+                                </div>
+                                
                             </div>
                         </div>
-                    </div>
-                    <hr>
-                    <div class="col-xs-12">
-                        <a href="#" ng-repeat='(ind, u) in chatUsuarios' ng-click="setaUsuarioAtivo(ind)" class="btn btn-primary">
-                            {{u.usuario}}
-                        </a>
-                    </div>
-                    <div class="col-xs-10">
-                        <input type="text" class="form-control" placeholder="Mensagem" ng-model="novaMensagem" ng-keyup="$event.keyCode==13 ? enviarMensagem() : nulls ">
-                    </div>
-                    <div class="col-xs-2">
-                        <button class="btn btn-primary btn-block" type="button" ng-click="enviarMensagem()" ng-disabled="novaMensagem!=''">Enviar</button>
+                        
+                        <hr/>
+                        
+                        <div class="col-xs-12">
+                            <a 
+                               href="#"
+                               ng-repeat="(ind, u) in chatUsuarios"
+                               ng-click="setUsuarioAtivo(ind)"
+                               class="btn btn-primary"
+                               >
+                                {{u.usuario}}
+                            </a>
+                        </div>
+                        
+                        <div class="col-xs-10">
+                        
+                            <input 
+                                   type="text"
+                                   class="form-control"
+                                   placeholder="Mensagem"
+                                   ng-model="novaMensagem"
+                                   ng-keyup="$event.keyCode == 13 ? enviarMensagem() : null"
+                                   >
+                            
+                        </div>
+                        <div class="col-xs-2">
+                            <button
+                                class="btn btn-primary btn-block"
+                                type="button"
+                                ng-click="enviarMensagem()"
+                                ng-disabled="novaMensagem!=''"
+                                
+                                    >
+                                Enviar
+                            </button>
+                        </div>
                     </div>
                 </div>
+                
             </div>
-
-        </div>
-        <hr>
+            <hr>
 
 
 
